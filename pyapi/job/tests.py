@@ -7,6 +7,7 @@ from django.test.utils import setup_test_environment
 setup_test_environment()
 from django.test import Client
 client = Client()
+
 """
 
 
@@ -36,7 +37,10 @@ class JobViewTests(TestCase):
         self.assertTrue("not found" in response.json()["error"])
 
     def test_job_endpoint(self):
-        response = self.client.post('/job', format='json', data={})
+        data = {
+            "valid_input_int": 5,
+        }
+        response = self.client.post('/job', format='json', data=data)
         job_uuid = response.json()["job_uuid"]
         data = {
             "job_uuid": job_uuid
@@ -44,3 +48,10 @@ class JobViewTests(TestCase):
         response = self.client.get('/result', format='json', data=data)
         j = response.json()
         self.assertTrue(j["status"] == "created")
+        self.assertTrue(j["valid_input_int"] == 5)
+
+        data = {
+            "non_existent_input": 8
+        }
+        response = self.client.post('/job', format='json', data=data)
+        self.assertTrue("unable to save inputs" in response.json()["error"])
