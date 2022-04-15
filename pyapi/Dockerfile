@@ -4,6 +4,5 @@ WORKDIR /opt/py
 COPY . .
 RUN pip install -r requirements.txt
 
-EXPOSE 5000
-CMD ["python", "api.py"]
-
+EXPOSE 8000
+ENTRYPOINT ["/bin/bash", "-c"]
