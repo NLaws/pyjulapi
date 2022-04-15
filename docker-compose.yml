@@ -4,9 +4,44 @@ services:
 
   pyapi:
     build:
-      context: ./py 
+      context: ./pyapi
+    ports:
+      - 8000:8000
+    command:  >
+      "python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - REDIS_HOST=redis
+      - SQL_HOST=db
+      - SQL_PORT=5432
+    volumes:
+      - ./pyapi:/opt/pyapi
+
+  redis:
+    image: redis
+    command: redis-server
+    expose:
+      - 6379
+
+  celery:
+    build:
+      context: ./pyapi
     ports:
       - 5000:5000
-    volumes:
-      - ./py:/opt/py
+    command:  >
+      "celery -A pyapi worker -l info"
+    environment:
+      - REDIS_HOST=redis
+      - SQL_HOST=db
+      - SQL_PORT=5432
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpass
+      - POSTGRES_DB=pgdb
+    expose:
+      - 5432
 
