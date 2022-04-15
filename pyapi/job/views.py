@@ -22,8 +22,6 @@ def job(request):
     except Exception as e:
         return JsonResponse({"error": f"unable to save inputs: {e.args}"})
 
-    validated_data = model_to_dict(j)
-
     try:
         print("id: ", id)
         runjob.s(id).apply_async()

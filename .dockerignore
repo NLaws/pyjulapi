@@ -1,0 +1,10 @@
+.git
+env/
+*.pyc
+*.rdb
+*.log
+*/.*
+docs/
+*.md
+**/*.dylib
+**/*.dll

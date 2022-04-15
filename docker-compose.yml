@@ -9,7 +9,7 @@ services:
       - 8000:8000
     command:  >
       "python manage.py migrate
-      && python manage.py runserver 0.0.0.0:8000"
+      && /opt/pyapi/wait-for-it.bash -t 0 julia:8081 -- python manage.py runserver 0.0.0.0:8000"
     environment:
       - REDIS_HOST=redis
       - SQL_HOST=db
@@ -44,4 +44,12 @@ services:
       - POSTGRES_DB=pgdb
     expose:
       - 5432
+  
+  julia:
+    container_name: julapi
+    build:
+      context: julapi/
+    command: julia --project=/opt/julapi http.jl
+    ports:
+      - "8081:8081"
 
