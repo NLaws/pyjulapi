@@ -1,11 +1,11 @@
 from django.http import JsonResponse
 import uuid
-import requests, json
+import time
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
-from .models import Job
-from celery import shared_task
+from job.models import Job
+from job.tasks import runjob
 
 
 @csrf_exempt
@@ -23,6 +23,12 @@ def job(request):
         return JsonResponse({"error": f"unable to save inputs: {e.args}"})
 
     validated_data = model_to_dict(j)
+
+    try:
+        print("id: ", id)
+        runjob.s(id).apply_async()
+    except Exception as e:
+        return JsonResponse({"error": e.args})
 
     return JsonResponse({"job_uuid": id})
 
@@ -47,12 +53,3 @@ def result(request):
         return JsonResponse({"error": f"job_uuid {job_uuid} not found"}, status=400)
     
     return JsonResponse(model_to_dict(j), status=200)
-
-
-# @shared_task()
-# def runjob(data):
-#     # 1. do python task
-
-#     # 2. do julia task
-
-#     # 3. save results
